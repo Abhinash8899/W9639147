@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "125106570671",
+    "project_id": "mediminder-d20bd",
+    "storage_bucket": "mediminder-d20bd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:125106570671:android:58a555c08d8988622b5b5a",
+        "android_client_info": {
+          "package_name": "uk.ac.tees.mad.w9639147"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAr0gHXaHW8AHXte77mT5gWnP2IwFeSnUk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
