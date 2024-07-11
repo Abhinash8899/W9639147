@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import uk.ac.tees.mad.w9639147.ui.AddTask
 import uk.ac.tees.mad.w9639147.ui.SplashScreen
 import uk.ac.tees.mad.w9639147.ui.HomeScreen
 import uk.ac.tees.mad.w9639147.ui.LoginScreen
@@ -69,6 +70,10 @@ fun MediMinderApp(modifier: Modifier) {
             composable("register") {
                 RegisterScreen()
             }
+            composable("addtask") {
+                AddTask()
+            }
+            
         }
     }
 }
