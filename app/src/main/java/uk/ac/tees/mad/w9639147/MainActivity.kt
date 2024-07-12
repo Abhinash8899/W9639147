@@ -20,6 +20,7 @@ import uk.ac.tees.mad.w9639147.ui.AddTask
 import uk.ac.tees.mad.w9639147.ui.SplashScreen
 import uk.ac.tees.mad.w9639147.ui.HomeScreen
 import uk.ac.tees.mad.w9639147.ui.LoginScreen
+import uk.ac.tees.mad.w9639147.ui.ProfileScreen
 import uk.ac.tees.mad.w9639147.ui.RegisterScreen
 import uk.ac.tees.mad.w9639147.ui.theme.MediMinderTheme
 
@@ -65,7 +66,18 @@ fun MediMinderApp(modifier: Modifier) {
                 HomeScreen()
             }
             composable("login") {
-                LoginScreen()
+                LoginScreen(
+                    onLoginSuccess = {
+                        navController.navigate("home") {
+                            popUpTo("login") {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    onRegister = {
+                        navController.navigate("register")
+                    }
+                )
             }
             composable("register") {
                 RegisterScreen()
@@ -73,7 +85,21 @@ fun MediMinderApp(modifier: Modifier) {
             composable("addtask") {
                 AddTask()
             }
-            
+            composable("taskdetails") {
+                TaskDetailsScreen()
+            }
+            composable("profile") {
+                ProfileScreen(
+                    onLogout = {
+                        firebase.signOut()
+                        navController.navigate("login") {
+                            popUpTo("home") {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
         }
     }
 }

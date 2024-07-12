@@ -41,6 +41,7 @@ fun SplashScreen(modifier: Modifier = Modifier, onTimeout: () -> Unit) {
                 modifier = Modifier.padding(16.dp),
                 fontSize = 30.sp,
             )
+            Text(text = "Manage tasks at your tips", fontSize = 18.sp)
         }
     }
 }
