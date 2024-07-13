@@ -80,7 +80,18 @@ fun MediMinderApp(modifier: Modifier) {
                 )
             }
             composable("register") {
-                RegisterScreen()
+                RegisterScreen(
+                    onRegisterSuccess = {
+                        navController.navigate("home") {
+                            popUpTo("register") {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    onLogin = {
+                        navController.navigate("login")
+                    }
+                )
             }
             composable("addtask") {
                 AddTask()
