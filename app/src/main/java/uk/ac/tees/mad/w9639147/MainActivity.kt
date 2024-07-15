@@ -30,87 +30,87 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MediMinderTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MediMinderApp(Modifier.padding(innerPadding))
-                }
+                MediMinderApp()
+
             }
         }
     }
 }
 
 @Composable
-fun MediMinderApp(modifier: Modifier) {
+fun MediMinderApp() {
     val navController = rememberNavController()
     val firebase = Firebase.auth
     val currentUser = firebase.currentUser
     val isLoggedIn = currentUser != null
 
-    Scaffold(modifier = modifier) { innerPadding ->
-        NavHost(
-            modifier = Modifier.padding(innerPadding),
-            navController = navController,
-            startDestination = "splash"
-        ) {
-            composable("splash") {
-                SplashScreen(
-                    onTimeout = {
-                        navController.navigate(if (isLoggedIn) "home" else "login") {
-                            popUpTo("splash") {
-                                inclusive = true
-                            }
+    NavHost(
+        navController = navController,
+        startDestination = "splash"
+    ) {
+        composable("splash") {
+            SplashScreen(
+                onTimeout = {
+                    navController.navigate(if (isLoggedIn) "home" else "login") {
+                        popUpTo("splash") {
+                            inclusive = true
                         }
                     }
-                )
-            }
-            composable("home") {
-                HomeScreen()
-            }
-            composable("login") {
-                LoginScreen(
-                    onLoginSuccess = {
-                        navController.navigate("home") {
-                            popUpTo("login") {
-                                inclusive = true
-                            }
-                        }
-                    },
-                    onRegister = {
-                        navController.navigate("register")
-                    }
-                )
-            }
-            composable("register") {
-                RegisterScreen(
-                    onRegisterSuccess = {
-                        navController.navigate("home") {
-                            popUpTo("register") {
-                                inclusive = true
-                            }
-                        }
-                    },
-                    onLogin = {
-                        navController.navigate("login")
-                    }
-                )
-            }
-            composable("addtask") {
-                AddTask()
-            }
-            composable("taskdetails") {
-                TaskDetailsScreen()
-            }
-            composable("profile") {
-                ProfileScreen(
-                    onLogout = {
-                        firebase.signOut()
-                        navController.navigate("login") {
-                            popUpTo("home") {
-                                inclusive = true
-                            }
+                }
+            )
+        }
+        composable("home") {
+            HomeScreen(
+                onAddClicked = {
+                    navController.navigate("addtask")
+                }
+            )
+        }
+        composable("login") {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate("home") {
+                        popUpTo("login") {
+                            inclusive = true
                         }
                     }
-                )
-            }
+                },
+                onRegister = {
+                    navController.navigate("register")
+                }
+            )
+        }
+        composable("register") {
+            RegisterScreen(
+                onRegisterSuccess = {
+                    navController.navigate("home") {
+                        popUpTo("register") {
+                            inclusive = true
+                        }
+                    }
+                },
+                onLogin = {
+                    navController.navigate("login")
+                }
+            )
+        }
+        composable("addtask") {
+            AddTask()
+        }
+        composable("taskdetails") {
+            TaskDetailsScreen()
+        }
+        composable("profile") {
+            ProfileScreen(
+                onLogout = {
+                    firebase.signOut()
+                    navController.navigate("login") {
+                        popUpTo("home") {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
     }
 }
