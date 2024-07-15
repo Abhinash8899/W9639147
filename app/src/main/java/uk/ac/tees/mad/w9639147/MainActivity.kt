@@ -95,7 +95,11 @@ fun MediMinderApp() {
             )
         }
         composable("addtask") {
-            AddTask()
+            AddTask(
+                onBackPressed = {
+                    navController.popBackStack()
+                }
+            )
         }
         composable("taskdetails") {
             TaskDetailsScreen()
