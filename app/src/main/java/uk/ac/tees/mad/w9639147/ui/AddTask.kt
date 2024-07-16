@@ -51,12 +51,13 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import uk.ac.tees.mad.w9639147.ApplicationViewModel
 import uk.ac.tees.mad.w9639147.LocationManager
+import uk.ac.tees.mad.w9639147.MediMinderApp
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
+fun AddTask(modifier: Modifier = Modifier,userUid : String, onBackPressed: () -> Unit) {
     val isLoading = remember { mutableStateOf(false) }
     val taskName = remember { mutableStateOf("") }
     val taskDescription = remember { mutableStateOf("") }
@@ -237,7 +238,7 @@ fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
                             "time" to time.value,
                             "location" to location.value
                         )
-                        firestore.collection("tasks").add(task).addOnSuccessListener {
+                        firestore.collection("tasks").document(userUid).collection("user_tasks").add(task).addOnSuccessListener {
                             Toast.makeText(context, "Task added", Toast.LENGTH_SHORT).show()
                             isLoading.value = false
                             onBackPressed()

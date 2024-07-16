@@ -43,6 +43,7 @@ fun MediMinderApp() {
     val firebase = Firebase.auth
     val currentUser = firebase.currentUser
     val isLoggedIn = currentUser != null
+    val uid = currentUser?.uid
 
     NavHost(
         navController = navController,
@@ -95,7 +96,7 @@ fun MediMinderApp() {
             )
         }
         composable("addtask") {
-            AddTask(
+            AddTask(userUid = uid!!,
                 onBackPressed = {
                     navController.popBackStack()
                 }
