@@ -61,7 +61,7 @@ fun MediMinderApp() {
             )
         }
         composable("home") {
-            HomeScreen(
+            HomeScreen(userUid = uid!!,
                 onAddClicked = {
                     navController.navigate("addtask")
                 }
