@@ -64,6 +64,9 @@ fun MediMinderApp() {
             HomeScreen(userUid = uid!!,
                 onAddClicked = {
                     navController.navigate("addtask")
+                },
+                onProfileClick = {
+                    navController.navigate("profile")
                 }
             )
         }
