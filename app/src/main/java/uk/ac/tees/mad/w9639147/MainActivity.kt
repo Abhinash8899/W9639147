@@ -85,7 +85,9 @@ fun MediMinderApp() {
             ) { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getString("taskId")
                 if (taskId != null && uid != null) {
-                    TaskDetailsScreen(taskId = taskId, userUid = uid)
+                    TaskDetailsScreen(taskId = taskId, userUid = uid, onBackClick = {
+                        navController.popBackStack()
+                    })
                 }
             }
             composable("login") {
