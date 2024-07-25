@@ -6,17 +6,28 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -82,9 +94,15 @@ fun HomeScreen(modifier: Modifier = Modifier,userUid : String ,onAddClicked: () 
             }
         }
     ) { iv ->
+        Column(Modifier
+            .padding(iv)) {
+        Text(text = "Your Tasks",
+            color = Color.Black,
+            fontSize = 20.sp,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(start = 22.dp))
         LazyColumn(
             Modifier
-                .padding(iv)
                 .fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -93,6 +111,7 @@ fun HomeScreen(modifier: Modifier = Modifier,userUid : String ,onAddClicked: () 
                 TaskItem(task)
             }
         }
+            }
     }
 }
 
@@ -101,10 +120,49 @@ fun TaskItem(task: HashMap<String, Any>) {
     // UI for displaying each task item
     val name = task["name"] as? String ?: ""
     val description = task["description"] as? String ?: ""
+    val location = task["location"] as? String ?: ""
+    val time = task["time"] as? String ?: ""
 
-    Text(
-        text = "$name - $description - $t",
-        style = MaterialTheme.typography.bodyLarge,
-        modifier = Modifier.padding(8.dp)
-    )
+    Card() {
+        Column (modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Row {
+                Icon(imageVector = Icons.Filled.Edit, contentDescription = null,)
+                Text(
+                    text = "$name ",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(8.dp)
+                )
+
+            }
+            Spacer(modifier = Modifier.height(5.dp))
+            Row {
+                Text(
+                    text = "$description ",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Row {
+                Icon(imageVector = Icons.Filled.LocationOn, contentDescription = null )
+                Text(
+                    text = "$location ",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Row {
+                Icon(imageVector = Icons.Filled.DateRange, contentDescription = null)
+                Text(
+                    text = "$time ",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+        }
+    }
 }

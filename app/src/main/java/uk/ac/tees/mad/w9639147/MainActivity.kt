@@ -107,6 +107,7 @@ fun MediMinderApp() {
         }
         composable("profile") {
             ProfileScreen(
+                userUid = uid!!,
                 onLogout = {
                     firebase.signOut()
                     navController.navigate("login") {
