@@ -69,9 +69,12 @@ fun ProfileScreen(modifier: Modifier = Modifier, userUid: String, onLogout: () -
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Card(elevation = CardDefaults.elevatedCardElevation(20.dp)) {
+        Card(elevation = CardDefaults.elevatedCardElevation(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )) {
             Column(
-                modifier = Modifier.background(Color.LightGray),
+                modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

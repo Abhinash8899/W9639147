@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -47,94 +48,95 @@ fun MediMinderApp() {
     val currentUser = firebase.currentUser
     val isLoggedIn = currentUser != null
     val uid = currentUser?.uid
-
-    NavHost(
-        navController = navController,
-        startDestination = "splash"
-    ) {
-        composable("splash") {
-            SplashScreen(
-                onTimeout = {
-                    navController.navigate(if (isLoggedIn) "home" else "login") {
-                        popUpTo("splash") {
-                            inclusive = true
+    Surface {
+        NavHost(
+            navController = navController,
+            startDestination = "splash"
+        ) {
+            composable("splash") {
+                SplashScreen(
+                    onTimeout = {
+                        navController.navigate(if (isLoggedIn) "home" else "login") {
+                            popUpTo("splash") {
+                                inclusive = true
+                            }
                         }
                     }
-                }
-            )
-        }
-        composable("home") {
-            HomeScreen(userUid = uid!!,
-                onAddClicked = {
-                    navController.navigate("addtask")
-                },
-                onProfileClick = {
-                    navController.navigate("profile")
-                },
-                onItemClicked = {
-                    Log.d("ItemClicked2", "ItemClicked: $it")
-                    navController.navigate("taskdetails/$it")
-
-                }
-            )
-        }
-        composable(
-            route = "taskdetails/{taskId}",
-            arguments = listOf(navArgument("taskId"){type = NavType.StringType})
-        ) { backStackEntry ->
-            val taskId = backStackEntry.arguments?.getString("taskId")
-            if (taskId != null && uid != null) {
-                TaskDetailsScreen(taskId, userUid = uid)
+                )
             }
-        }
-        composable("login") {
-            LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate("home") {
-                        popUpTo("login") {
-                            inclusive = true
-                        }
-                    }
-                },
-                onRegister = {
-                    navController.navigate("register")
-                }
-            )
-        }
-        composable("register") {
-            RegisterScreen(
-                onRegisterSuccess = {
-                    navController.navigate("home") {
-                        popUpTo("register") {
-                            inclusive = true
-                        }
-                    }
-                },
-                onLogin = {
-                    navController.navigate("login")
-                }
-            )
-        }
-        composable("addtask") {
-            AddTask(userUid = uid!!,
-                onBackPressed = {
-                    navController.popBackStack()
-                }
-            )
-        }
+            composable("home") {
+                HomeScreen(userUid = uid!!,
+                    onAddClicked = {
+                        navController.navigate("addtask")
+                    },
+                    onProfileClick = {
+                        navController.navigate("profile")
+                    },
+                    onItemClicked = {
+                        Log.d("ItemClicked2", "ItemClicked: $it")
+                        navController.navigate("taskdetails/$it")
 
-        composable("profile") {
-            ProfileScreen(
-                userUid = uid!!,
-                onLogout = {
-                    firebase.signOut()
-                    navController.navigate("login") {
-                        popUpTo("home") {
-                            inclusive = true
+                    }
+                )
+            }
+            composable(
+                route = "taskdetails/{taskId}",
+                arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val taskId = backStackEntry.arguments?.getString("taskId")
+                if (taskId != null && uid != null) {
+                    TaskDetailsScreen(taskId = taskId, userUid = uid)
+                }
+            }
+            composable("login") {
+                LoginScreen(
+                    onLoginSuccess = {
+                        navController.navigate("home") {
+                            popUpTo("login") {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    onRegister = {
+                        navController.navigate("register")
+                    }
+                )
+            }
+            composable("register") {
+                RegisterScreen(
+                    onRegisterSuccess = {
+                        navController.navigate("home") {
+                            popUpTo("register") {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    onLogin = {
+                        navController.navigate("login")
+                    }
+                )
+            }
+            composable("addtask") {
+                AddTask(userUid = uid!!,
+                    onBackPressed = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable("profile") {
+                ProfileScreen(
+                    userUid = uid!!,
+                    onLogout = {
+                        firebase.signOut()
+                        navController.navigate("login") {
+                            popUpTo("home") {
+                                inclusive = true
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }

@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun TaskDetailsScreen(taskId: String, userUid: String) {
+fun TaskDetailsScreen(modifier: Modifier = Modifier,taskId: String, userUid: String) {
     val firestore = FirebaseFirestore.getInstance()
     val taskRef =
         firestore.collection("tasks").document(userUid).collection("user_tasks").document(taskId)
