@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -44,7 +45,7 @@ import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, userUid: String, onAddClicked: () -> Unit, onProfileClick : () -> Unit) {
+fun HomeScreen(modifier: Modifier = Modifier, userUid: String, onAddClicked: () -> Unit, onProfileClick : () -> Unit, onItemClicked :(id: String) -> Unit) {
     val tasks = remember { mutableStateOf<List<HashMap<String, Any>>>(emptyList()) }
 
     // Fetch tasks from Firestore
@@ -121,7 +122,10 @@ fun HomeScreen(modifier: Modifier = Modifier, userUid: String, onAddClicked: () 
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(tasks.value) { task ->
-                    TaskItem(task)
+                    TaskItem(task, onItemClick = {
+                        onItemClicked(it)
+                        Log.d("ItemClicked", "Task: $it")
+                    })
                 }
             }
         }
@@ -129,14 +133,16 @@ fun HomeScreen(modifier: Modifier = Modifier, userUid: String, onAddClicked: () 
 }
 
 @Composable
-fun TaskItem(task: HashMap<String, Any>) {
+fun TaskItem(task: HashMap<String, Any>, onItemClick: (String) -> Unit) {
     // UI for displaying each task item
     val name = task["name"] as? String ?: ""
     val description = task["description"] as? String ?: ""
     val location = task["location"] as? String ?: ""
     val time = task["time"] as? String ?: ""
     val id = task["id"] as? String ?: ""
-    Card() {
+    Card(modifier = Modifier.clickable {
+        onItemClick(id)
+    }) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally

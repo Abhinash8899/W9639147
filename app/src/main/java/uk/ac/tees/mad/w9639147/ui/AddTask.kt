@@ -55,9 +55,17 @@ import uk.ac.tees.mad.w9639147.MediMinderApp
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+data class TaskEntity(
+    val id: String?,
+    val name: String?,
+    val description: String?,
+    val time: String?,
+    val location: String?
+)
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun AddTask(modifier: Modifier = Modifier,userUid : String, onBackPressed: () -> Unit) {
+fun AddTask(modifier: Modifier = Modifier, userUid: String, onBackPressed: () -> Unit) {
     val isLoading = remember { mutableStateOf(false) }
     val taskName = remember { mutableStateOf("") }
     val taskDescription = remember { mutableStateOf("") }
@@ -232,16 +240,32 @@ fun AddTask(modifier: Modifier = Modifier,userUid : String, onBackPressed: () ->
                     onClick = {
                         isLoading.value = true
                         val firestore = Firebase.firestore
-                        val task = hashMapOf(
-                            "name" to taskName.value,
-                            "description" to taskDescription.value,
-                            "time" to time.value,
-                            "location" to location.value
+                        val task = TaskEntity(
+                            id = "",
+                            name = taskName.value,
+                            description = taskDescription.value,
+                            time = time.value,
+                            location = location.value
                         )
-                        firestore.collection("tasks").document(userUid).collection("user_tasks").add(task).addOnSuccessListener {
+                        firestore.collection("tasks").document(userUid).collection("user_tasks")
+                            .add(task).addOnSuccessListener { documentReference ->
+                                val taskID = documentReference.id
+                                val taskEntity = TaskEntity(
+                                    id = taskID,
+                                    name = taskName.value,
+                                    description = taskDescription.value,
+                                    time = time.value,
+                                    location = location.value
+                                )
+                                firestore.collection("tasks").document(userUid).collection("user_tasks").document(taskID).set(taskEntity).addOnSuccessListener {
+                                    Toast.makeText(context, "Task added", Toast.LENGTH_SHORT).show()
+                                    isLoading.value = false
+                                    onBackPressed()
+                                }
+
                             Toast.makeText(context, "Task added", Toast.LENGTH_SHORT).show()
                             isLoading.value = false
-                            onBackPressed()
+
                         }.addOnFailureListener {
                             Toast.makeText(context, "Task not added", Toast.LENGTH_SHORT).show()
                             isLoading.value = false
@@ -280,7 +304,7 @@ fun AddTask(modifier: Modifier = Modifier,userUid : String, onBackPressed: () ->
 fun TimePickerDialog(
     onTimeSet: (LocalTime) -> Unit,
     onDismissRequest: () -> Unit,
-    initialTime: LocalTime
+    initialTime: LocalTime,
 ) {
     var selectedHour by remember { mutableStateOf(initialTime.hour) }
     var selectedMinute by remember { mutableStateOf(initialTime.minute) }

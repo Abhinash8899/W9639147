@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
@@ -22,7 +23,6 @@ import kotlinx.coroutines.tasks.await
 @Composable
 fun ProfileScreen(modifier: Modifier = Modifier,userUid : String, onLogout: () -> Unit) {
     var tasks = remember { mutableMapOf<String, Any>() }
-    val context = LocalContext.current
 
     LaunchedEffect(key1 = true) {
         val firestore = FirebaseFirestore.getInstance()
@@ -44,7 +44,7 @@ fun ProfileScreen(modifier: Modifier = Modifier,userUid : String, onLogout: () -
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
         val email = tasks["username"]?:"No Email Kindly Edit your profile"
-        Text(text = "Profile")
+        Text(text = "Profile", fontSize = 30.sp)
         userInfoData(email = email.toString())
         Button(onClick = onLogout) {
             Text(text = "Logout")
@@ -56,9 +56,4 @@ fun userInfoData(email: String,) {
     Column {
         Text(text = email)
     }
-}
-@Preview
-@Composable
-fun showProfile(){
-    ProfileScreen(userUid = "123", onLogout = {})
 }
