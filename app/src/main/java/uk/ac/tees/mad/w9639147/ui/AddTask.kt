@@ -2,6 +2,7 @@ package uk.ac.tees.mad.w9639147.ui
 
 import android.Manifest
 import android.location.Location
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
@@ -209,6 +210,8 @@ fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
                                         locationManager.checkGpsSettings()
                                         println("Not enabled")
                                     } else {
+                                        Log.d("Location", "Location permission granted")
+                                        Log.d("Latitude", "${locationState.value.latitude}")
                                         location.value = locationManager.getAddressFromCoordinate(
                                             latitude = locationState.value.latitude,
                                             longitude = locationState.value.longitude
@@ -217,7 +220,7 @@ fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
 
                                     }
                                 } else {
-                                    println("Permisson not got")
+                                    println("Permission not got")
 
                                     locationPermissionsState.launchMultiplePermissionRequest()
                                 }

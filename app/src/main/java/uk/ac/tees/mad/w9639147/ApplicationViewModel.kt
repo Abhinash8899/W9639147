@@ -1,6 +1,7 @@
 package uk.ac.tees.mad.w9639147
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ContentValues
 import android.content.pm.PackageManager
@@ -16,6 +17,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
@@ -27,29 +29,32 @@ class ApplicationViewModel(application: Application) :
     private val fusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(application)
 
-    private var locationState = mutableStateOf(CurrentLocation())
+    private var locationState = mutableStateOf(Location())
 
     private var locationCallback: LocationCallback
-    private var counter = 0
 
+    @SuppressLint("MissingPermission")
     val locationFlow = callbackFlow {
-        while (true) {
-            ++counter
-
-            val location = Location("LocationProvider")
-            location.apply {
-                latitude = locationState.value.latitude ?: 0.0
-                longitude = locationState.value.longitude ?: 0.0
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                super.onLocationResult(locationResult)
+                for (location in locationResult.locations) {
+                    trySend(location)
+                }
             }
+        }
 
-            Log.d(
-                ContentValues.TAG,
-                "Location $counter:  ${location.latitude} ${location.longitude}"
-            )
-            trySend(location)
 
-//        awaitClose { close() }
-            delay(5000)
+        // Request location updates
+        fusedLocationProviderClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.getMainLooper()
+        )
+
+        // Await close and remove the location updates when the flow is no longer collected
+        awaitClose {
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback)
         }
     }.shareIn(
         viewModelScope,
@@ -63,6 +68,7 @@ class ApplicationViewModel(application: Application) :
                 super.onLocationResult(locationResult)
                 for (location in locationResult.locations) {
                     setLocationData(location)
+
                 }
             }
         }
@@ -97,7 +103,7 @@ class ApplicationViewModel(application: Application) :
 
     private fun setLocationData(location: Location?) {
         location?.let { newLocation ->
-            locationState.value = CurrentLocation(
+            locationState.value = Location(
                 latitude = newLocation.latitude,
                 longitude = newLocation.longitude
             )
@@ -113,11 +119,9 @@ class ApplicationViewModel(application: Application) :
             .build()
 
     }
-
-
 }
 
-data class CurrentLocation(
+data class Location(
     val latitude: Double? = null,
     val longitude: Double? = null
 )

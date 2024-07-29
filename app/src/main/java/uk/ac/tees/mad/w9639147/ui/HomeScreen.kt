@@ -2,6 +2,7 @@ package uk.ac.tees.mad.w9639147.ui
 
 import android.content.ContentValues.TAG
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -21,6 +23,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -36,7 +39,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -78,14 +83,14 @@ fun HomeScreen(modifier: Modifier = Modifier, onAddClicked: () -> Unit, onProfil
     }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Box(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = "MediMinder",
-                            fontSize = 26.sp,
+                            fontSize = 36.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.align(Alignment.Center)
                         )
@@ -93,6 +98,7 @@ fun HomeScreen(modifier: Modifier = Modifier, onAddClicked: () -> Unit, onProfil
                             imageVector = Icons.Filled.Person,
                             contentDescription = null,
                             modifier = Modifier
+                                .size(36.dp)
                                 .align(Alignment.CenterEnd)
                                 .clickable {
                                     onProfileClick()
@@ -114,13 +120,19 @@ fun HomeScreen(modifier: Modifier = Modifier, onAddClicked: () -> Unit, onProfil
             Modifier
                 .padding(iv)
         ) {
+            val gradient = Brush.linearGradient(
+                colors = listOf(Color(0xFF3F51B5), Color(0xFF2196F3))
+            )
             Text(
-                text = "Your Tasks -",
-                color = Color.Blue,
+                text = "Your Tasks :-",
+                style = TextStyle(
+                    brush = gradient,
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Bold
+                ),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(start = 22.dp)
+                modifier = Modifier.padding(start = 22.dp, top = 10.dp)
             )
             LazyColumn(
                 Modifier
@@ -151,46 +163,42 @@ fun TaskItem(task: HashMap<String, Any>, onItemClick: (String) -> Unit) {
         onItemClick(id)
     }) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF3F51B5),
+                            Color(0xFF2196F3)
+                        )
+                    )
+                )
         ) {
+            Text(
+                text = name,
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,modifier = Modifier.padding(10.dp))
+            Text(
+                text = description,
+                color = Color.White,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,modifier = Modifier.padding(start = 10.dp))
             Row {
-                Icon(imageVector = Icons.Filled.Edit, contentDescription = null)
-                Text(
-                    text = "$name ",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(8.dp)
-                )
+            Text(
+                text = time,
+                color = Color.White,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,modifier = Modifier.padding(start = 10.dp))
 
-            }
-            Spacer(modifier = Modifier.height(5.dp))
-            Row {
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(imageVector = Icons.Rounded.LocationOn, contentDescription = null, tint = Color.White)
                 Text(
-                    text = "$description ",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(8.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Row {
-                Icon(imageVector = Icons.Filled.LocationOn, contentDescription = null)
-                Text(
-                    text = "$location ",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(8.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Row {
-                Icon(imageVector = Icons.Filled.DateRange, contentDescription = null)
-                Text(
-                    text = "$time ",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(8.dp)
-                )
-            }
+                    text = location,
+                    color = Color.White,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 10.dp))
+        }
         }
     }
 }
