@@ -26,14 +26,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier, userUid: String, onLogout: () -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
+fun ProfileScreen(modifier: Modifier = Modifier, onLogout: () -> Unit) {
 
+    val coroutineScope = rememberCoroutineScope()
+    val userUid = Firebase.auth.currentUser?.uid
     val context = LocalContext.current
     var email by remember { mutableStateOf("Loading...") }
     var name by remember { mutableStateOf("Loading...") }
@@ -43,7 +46,7 @@ fun ProfileScreen(modifier: Modifier = Modifier, userUid: String, onLogout: () -
 
     LaunchedEffect(key1 = userUid) {
         val firestore = FirebaseFirestore.getInstance()
-        val userDocument = firestore.collection("users").document(userUid)
+        val userDocument = firestore.collection("users").document(userUid!!)
 
         try {
             val usernode = userDocument.get().await()
@@ -85,7 +88,7 @@ fun ProfileScreen(modifier: Modifier = Modifier, userUid: String, onLogout: () -
                     isLoading.value = true
                     coroutineScope.launch {
                         val firestore = FirebaseFirestore.getInstance()
-                        val userDocument = firestore.collection("users").document(userUid)
+                        val userDocument = firestore.collection("users").document(userUid!!)
                         val userData = hashMapOf(
                             "name" to name,
                             "number" to mobileNumber,

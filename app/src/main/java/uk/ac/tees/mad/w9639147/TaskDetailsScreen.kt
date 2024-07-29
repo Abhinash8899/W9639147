@@ -18,13 +18,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun TaskDetailsScreen(modifier: Modifier = Modifier,taskId: String, userUid: String, onBackClick: () -> Unit) {
+fun TaskDetailsScreen(modifier: Modifier = Modifier,taskId: String, onBackClick: () -> Unit) {
+    val userUid = Firebase.auth.currentUser?.uid
     val firestore = FirebaseFirestore.getInstance()
     val taskRef =
-        firestore.collection("tasks").document(userUid).collection("user_tasks").document(taskId)
+        firestore.collection("tasks").document(userUid!!).collection("user_tasks").document(taskId)
 
     val task = remember { mutableStateOf(emptyMap<String, Any>()) }
 

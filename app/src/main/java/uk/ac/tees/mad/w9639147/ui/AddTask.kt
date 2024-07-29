@@ -48,6 +48,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import uk.ac.tees.mad.w9639147.ApplicationViewModel
 import uk.ac.tees.mad.w9639147.LocationManager
@@ -65,7 +66,7 @@ data class TaskEntity(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun AddTask(modifier: Modifier = Modifier, userUid: String, onBackPressed: () -> Unit) {
+fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
     val isLoading = remember { mutableStateOf(false) }
     val taskName = remember { mutableStateOf("") }
     val taskDescription = remember { mutableStateOf("") }
@@ -73,6 +74,7 @@ fun AddTask(modifier: Modifier = Modifier, userUid: String, onBackPressed: () ->
         mutableStateOf("")
     }
 
+    val userUid = Firebase.auth.currentUser?.uid
     var selectedTime by remember { mutableStateOf(LocalTime.now()) }
     var showTimePicker by remember { mutableStateOf(false) }
 
@@ -247,7 +249,7 @@ fun AddTask(modifier: Modifier = Modifier, userUid: String, onBackPressed: () ->
                             time = time.value,
                             location = location.value
                         )
-                        firestore.collection("tasks").document(userUid).collection("user_tasks")
+                        firestore.collection("tasks").document(userUid!!).collection("user_tasks")
                             .add(task).addOnSuccessListener { documentReference ->
                                 val taskID = documentReference.id
                                 val taskEntity = TaskEntity(

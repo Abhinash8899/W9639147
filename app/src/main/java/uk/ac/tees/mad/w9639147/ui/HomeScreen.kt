@@ -40,20 +40,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, userUid: String, onAddClicked: () -> Unit, onProfileClick : () -> Unit, onItemClicked :(id: String) -> Unit) {
+fun HomeScreen(modifier: Modifier = Modifier, onAddClicked: () -> Unit, onProfileClick : () -> Unit, onItemClicked :(id: String) -> Unit) {
     val tasks = remember { mutableStateOf<List<HashMap<String, Any>>>(emptyList()) }
+    val userUid = Firebase.auth.currentUser?.uid
 
     // Fetch tasks from Firestore
     LaunchedEffect(key1 = true) {
         val firestore = FirebaseFirestore.getInstance()
         val tasksCollection =
-            firestore.collection("tasks").document(userUid).collection("user_tasks")
-
+            if (userUid!= null) {
+                firestore.collection("tasks").document(userUid).collection("user_tasks")
+            }else{
+                return@LaunchedEffect
+            }
         try {
             val querySnapshot = tasksCollection.get().await() // Await the result
 
@@ -109,9 +115,10 @@ fun HomeScreen(modifier: Modifier = Modifier, userUid: String, onAddClicked: () 
                 .padding(iv)
         ) {
             Text(
-                text = "Your Tasks",
-                color = Color.Black,
+                text = "Your Tasks -",
+                color = Color.Blue,
                 fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(start = 22.dp)
             )

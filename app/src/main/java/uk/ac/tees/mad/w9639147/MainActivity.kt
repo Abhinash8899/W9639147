@@ -7,6 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -41,7 +43,6 @@ fun MediMinderApp() {
     val firebase = Firebase.auth
     val currentUser = firebase.currentUser
     val isLoggedIn = currentUser != null
-    val uid = currentUser?.uid
     Surface {
         NavHost(
             navController = navController,
@@ -59,7 +60,7 @@ fun MediMinderApp() {
                 )
             }
             composable("home") {
-                HomeScreen(userUid = uid!!,
+                HomeScreen(
                     onAddClicked = {
                         navController.navigate("addtask")
                     },
@@ -78,8 +79,8 @@ fun MediMinderApp() {
                 arguments = listOf(navArgument("taskId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getString("taskId")
-                if (taskId != null && uid != null) {
-                    TaskDetailsScreen(taskId = taskId, userUid = uid, onBackClick = {
+                if (taskId != null) {
+                    TaskDetailsScreen(taskId = taskId, onBackClick = {
                         navController.popBackStack()
                     })
                 }
@@ -113,16 +114,15 @@ fun MediMinderApp() {
                 )
             }
             composable("addtask") {
-                AddTask(userUid = uid!!,
-                    onBackPressed = {
-                        navController.popBackStack()
-                    }
-                )
+                    AddTask(
+                        onBackPressed = {
+                            navController.popBackStack()
+                        }
+                    )
             }
 
             composable("profile") {
                 ProfileScreen(
-                    userUid = uid!!,
                     onLogout = {
                         firebase.signOut()
                         navController.navigate("login") {
@@ -136,3 +136,4 @@ fun MediMinderApp() {
         }
     }
 }
+
