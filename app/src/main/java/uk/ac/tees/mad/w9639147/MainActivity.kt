@@ -5,14 +5,8 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,11 +15,11 @@ import androidx.navigation.navArgument
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import uk.ac.tees.mad.w9639147.ui.AddTask
-import uk.ac.tees.mad.w9639147.ui.SplashScreen
 import uk.ac.tees.mad.w9639147.ui.HomeScreen
 import uk.ac.tees.mad.w9639147.ui.LoginScreen
 import uk.ac.tees.mad.w9639147.ui.ProfileScreen
 import uk.ac.tees.mad.w9639147.ui.RegisterScreen
+import uk.ac.tees.mad.w9639147.ui.SplashScreen
 import uk.ac.tees.mad.w9639147.ui.theme.MediMinderTheme
 
 class MainActivity : ComponentActivity() {
