@@ -41,10 +41,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -83,7 +85,9 @@ fun HomeScreen(modifier: Modifier = Modifier, onAddClicked: () -> Unit, onProfil
     }
 
     Scaffold(
-        modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary),
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -159,46 +163,61 @@ fun TaskItem(task: HashMap<String, Any>, onItemClick: (String) -> Unit) {
     val location = task["location"] as? String ?: ""
     val time = task["time"] as? String ?: ""
     val id = task["id"] as? String ?: ""
+    val imageUri = task["imageUri"] as? String ?: ""
     Card(modifier = Modifier.clickable {
         onItemClick(id)
     }) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF3F51B5),
-                            Color(0xFF2196F3)
+        Row {
+            AsyncImage(model = imageUri, contentDescription = "task_image", modifier = Modifier.size(100.dp), contentScale = ContentScale.FillWidth)
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFF3F51B5),
+                                Color(0xFF2196F3)
+                            )
                         )
                     )
-                )
-        ) {
-            Text(
-                text = name,
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,modifier = Modifier.padding(10.dp))
-            Text(
-                text = description,
-                color = Color.White,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.SemiBold,modifier = Modifier.padding(start = 10.dp))
-            Row {
-            Text(
-                text = time,
-                color = Color.White,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,modifier = Modifier.padding(start = 10.dp))
+            ) {
 
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(imageVector = Icons.Rounded.LocationOn, contentDescription = null, tint = Color.White)
+
                 Text(
-                    text = location,
+                    text = name,
                     color = Color.White,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 10.dp))
-        }
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold, modifier = Modifier.padding(10.dp)
+                )
+                Text(
+                    text = description,
+                    color = Color.White,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 10.dp)
+                )
+                Row {
+                    Text(
+                        text = time,
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp)
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(
+                        imageVector = Icons.Rounded.LocationOn,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                    Text(
+                        text = location,
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 10.dp)
+                    )
+                }
+            }
         }
     }
 }
