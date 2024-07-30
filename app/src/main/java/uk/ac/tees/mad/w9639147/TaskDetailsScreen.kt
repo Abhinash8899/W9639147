@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,10 +13,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +38,27 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditTaskScreen(id: String, name: String, description: String, time: String,location : String, onDismiss:() -> Unit) {
+    val names = remember { mutableStateOf(name) }
+    val descriptions = remember { mutableStateOf(description) }
+    val times = remember { mutableStateOf(time) }
+    val locations = remember { mutableStateOf(location) }
+
+        AlertDialog(onDismissRequest = { onDismiss() }) {
+            Column {
+                OutlinedTextField(value = names.value, onValueChange = { names.value = it })
+                OutlinedTextField(value = descriptions.value, onValueChange = {descriptions.value = it})
+                OutlinedTextField(value = times.value, onValueChange = {times.value = it})
+                OutlinedTextField(value = locations.value, onValueChange = {locations.value = it})
+                Button(onClick = { Log.d("UserData", names.value) }) {
+                    Text(text = "Save")
+                }
+            }
+        }
+}
+
 @Composable
 fun TaskDetailsScreen(modifier: Modifier = Modifier,taskId: String, onBackClick: () -> Unit) {
     val userUid = Firebase.auth.currentUser?.uid
@@ -41,6 +68,9 @@ fun TaskDetailsScreen(modifier: Modifier = Modifier,taskId: String, onBackClick:
 
     val task = remember { mutableStateOf(emptyMap<String, Any>()) }
 
+    val isEditVisible = remember {
+        mutableStateOf(false)
+    }
 
     remember {
         taskRef.get().addOnSuccessListener { documentSnapshot ->
@@ -55,47 +85,73 @@ fun TaskDetailsScreen(modifier: Modifier = Modifier,taskId: String, onBackClick:
     val description = task.value["description"].toString()
     val time = task.value["time"].toString()
     val location = task.value["location"].toString()
-    Column(modifier = Modifier.fillMaxSize(),Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
-        val gradient = Brush.linearGradient(
-            colors = listOf(Color(0xFF3F51B5), Color(0xFF2196F3))
-        )
-        Text(text = "Task Details",
-            style = TextStyle(
-                brush = gradient,
-            fontSize = 40.sp,
-            fontWeight = FontWeight.Bold
-        ),
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(start = 22.dp)
-        )
-        cardView(name = name, description = description, time = time, location = location, onDelete = {
-            taskRef.delete()
-                .addOnSuccessListener {
-                    Log.d("TaskDetailsScreen", "Task deleted successfully")
-                    onBackClick()
+    Box {
+        Column(
+            modifier = Modifier.fillMaxSize(), Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (isEditVisible.value){
+                EditTaskScreen(
+                    id = id,
+                    name = name,
+                    description = description,
+                    time = time,
+                    location = location,
+                    onDismiss = {
+                        isEditVisible.value = false
+                    })
+            }
+            val gradient = Brush.linearGradient(
+                colors = listOf(Color(0xFF3F51B5), Color(0xFF2196F3))
+            )
+            Text(
+                text = "Task Details",
+                style = TextStyle(
+                    brush = gradient,
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 22.dp)
+            )
+            cardView(
+                name = name,
+                description = description,
+                time = time,
+                location = location,
+                onDelete = {
+                    taskRef.delete()
+                        .addOnSuccessListener {
+                            Log.d("TaskDetailsScreen", "Task deleted successfully")
+                            onBackClick()
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("TaskDetailsScreen", "Error deleting task", e)
+                        }
+                },
+                onEditClick = {
+                    isEditVisible.value = true
                 }
-                .addOnFailureListener { e ->
-                    Log.w("TaskDetailsScreen", "Error deleting task", e)
-                }
+            )
         }
-        )
     }
 }
 
 @Composable
-fun cardView(name: String, description : String, time : String, location : String, onDelete:() -> Unit){
+fun cardView(name: String, description : String, time : String, location : String, onDelete:() -> Unit, onEditClick:() -> Unit){
     Column() {
         Card(modifier =Modifier.fillMaxWidth() ,elevation = CardDefaults.elevatedCardElevation(30.dp)) {
-            Column(modifier = Modifier.fillMaxWidth().background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF3F51B5),
-                        Color(0xFF2196F3)
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF3F51B5),
+                            Color(0xFF2196F3)
+                        )
                     )
-                )
-            )) {
+                )) {
                 Text(
                     text = name,
                     color = Color.White,
@@ -123,8 +179,15 @@ fun cardView(name: String, description : String, time : String, location : Strin
                 }
             }
         }
-        Icon(imageVector = Icons.Filled.Delete, contentDescription = "Delete Task", modifier = Modifier.padding(8.dp).clickable {
-            onDelete()
-        })
+        Icon(imageVector = Icons.Filled.Delete, contentDescription = "Delete Task", modifier = Modifier
+            .padding(8.dp)
+            .clickable {
+                onDelete()
+            })
+        Icon(imageVector = Icons.Filled.Edit, contentDescription = "Edit Profile",modifier = Modifier
+            .padding(8.dp)
+            .clickable {
+                onEditClick()
+            })
     }
 }

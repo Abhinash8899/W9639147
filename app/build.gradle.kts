@@ -70,6 +70,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation ("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
     implementation(libs.play.services.location)
+    implementation(libs.firebase.storage)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

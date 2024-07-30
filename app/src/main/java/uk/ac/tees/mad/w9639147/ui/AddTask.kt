@@ -1,10 +1,16 @@
 package uk.ac.tees.mad.w9639147.ui
 
 import android.Manifest
+import android.content.Context
 import android.location.Location
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -37,32 +44,43 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import uk.ac.tees.mad.w9639147.ApplicationViewModel
 import uk.ac.tees.mad.w9639147.LocationManager
 import uk.ac.tees.mad.w9639147.MediMinderApp
+import uk.ac.tees.mad.w9639147.R
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 data class TaskEntity(
     val id: String?,
     val name: String?,
     val description: String?,
     val time: String?,
-    val location: String?
+    val location: String?,
+    val imageUri: String?
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -74,6 +92,7 @@ fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
     val location = remember {
         mutableStateOf("")
     }
+    val imageUrl = remember { mutableStateOf("") }
 
     val userUid = Firebase.auth.currentUser?.uid
     var selectedTime by remember { mutableStateOf(LocalTime.now()) }
@@ -84,6 +103,7 @@ fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
     val formattedTime = currentTime.format(formatter)
     val time = remember { mutableStateOf(formattedTime) }
 
+    val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(selectedTime) {
         time.value = selectedTime.format(formatter)
     }
@@ -95,7 +115,14 @@ fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
     val locationPermissionsState = rememberMultiplePermissionsState(
         locationPermissions
     )
+
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            imageUri = uri
+        }
+
     val applicationViewModel: ApplicationViewModel = viewModel()
 
     val activity = (context as ComponentActivity)
@@ -132,6 +159,40 @@ fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                imageUri?.let {
+                    val painter = rememberAsyncImagePainter(it)
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(250.dp)
+                            .border(
+                                width = 2.dp,
+                                color = Color.Black,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .clickable {
+                                launcher.launch("image/*")
+                            }
+                    )
+                } ?: run {
+                    Image(
+                        painter = rememberAsyncImagePainter(R.drawable.ic_launcher_foreground),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(250.dp)
+                            .border(
+                                width = 2.dp,
+                                color = Color.Black,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .clickable {
+                                launcher.launch("image/*")
+                            }
+                    )
+                }
 
                 OutlinedTextField(
                     value = taskName.value,
@@ -243,39 +304,58 @@ fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
                 )
                 Button(
                     onClick = {
-                        isLoading.value = true
-                        val firestore = Firebase.firestore
-                        val task = TaskEntity(
-                            id = "",
-                            name = taskName.value,
-                            description = taskDescription.value,
-                            time = time.value,
-                            location = location.value
-                        )
-                        firestore.collection("tasks").document(userUid!!).collection("user_tasks")
-                            .add(task).addOnSuccessListener { documentReference ->
-                                val taskID = documentReference.id
-                                val taskEntity = TaskEntity(
-                                    id = taskID,
-                                    name = taskName.value,
-                                    description = taskDescription.value,
-                                    time = time.value,
-                                    location = location.value
-                                )
-                                firestore.collection("tasks").document(userUid).collection("user_tasks").document(taskID).set(taskEntity).addOnSuccessListener {
+                        coroutineScope.launch {
+                            isLoading.value = true
+                            val firestore = Firebase.firestore
+                            imageUri.let {
+                                if (it != null) {
+                                    imageUrl.value = uploadImageToFirebase(context, it)!!
+                                }
+                            }
+                            val task = TaskEntity(
+                                id = "",
+                                name = taskName.value,
+                                description = taskDescription.value,
+                                time = time.value,
+                                location = location.value,
+                                imageUri = imageUrl.value
+                            )
+                            Log.d("Task", task.toString())
+                            firestore.collection("tasks").document(userUid!!)
+                                .collection("user_tasks")
+                                .add(task).addOnSuccessListener { documentReference ->
+                                    val taskID = documentReference.id
+                                    val taskEntity = TaskEntity(
+                                        id = taskID,
+                                        name = taskName.value,
+                                        description = taskDescription.value,
+                                        time = time.value,
+                                        location = location.value,
+                                        imageUri = imageUrl.value
+                                    )
+                                    Log.d("Task", taskEntity.toString())
+                                    firestore.collection("tasks").document(userUid)
+                                        .collection("user_tasks").document(taskID).set(taskEntity)
+                                        .addOnSuccessListener {
+                                            Toast.makeText(
+                                                context,
+                                                "Task added",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            isLoading.value = false
+                                            onBackPressed()
+                                        }
+
                                     Toast.makeText(context, "Task added", Toast.LENGTH_SHORT).show()
                                     isLoading.value = false
-                                    onBackPressed()
+
+                                }.addOnFailureListener {
+                                    Toast.makeText(context, "Task not added", Toast.LENGTH_SHORT)
+                                        .show()
+                                    isLoading.value = false
                                 }
 
-                            Toast.makeText(context, "Task added", Toast.LENGTH_SHORT).show()
-                            isLoading.value = false
-
-                        }.addOnFailureListener {
-                            Toast.makeText(context, "Task not added", Toast.LENGTH_SHORT).show()
-                            isLoading.value = false
                         }
-
                     }, modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
@@ -304,6 +384,25 @@ fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
     }
 }
 
+suspend fun uploadImageToFirebase(context: Context, imageUri: Uri): String? {
+    return try {
+        val storageRef = Firebase.storage.reference
+        val imageRef = storageRef.child("images/${UUID.randomUUID()}.jpg")
+        val uploadTask = imageRef.putFile(imageUri)
+
+        val downloadUrl = uploadTask.continueWithTask { task ->
+            if (!task.isSuccessful) {
+                task.exception?.let { throw it }
+            }
+            imageRef.downloadUrl
+        }.await()
+
+        downloadUrl.toString()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
 
 @Composable
 fun TimePickerDialog(
