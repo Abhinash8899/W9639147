@@ -106,7 +106,7 @@ fun RegisterScreen(
                                 .addOnSuccessListener {
                                     val firestore = Firebase.firestore
                                     val user = hashMapOf(
-                                        "username" to username,
+                                        "email" to username,
                                         "password" to password
                                     )
                                     val uid = it.user?.uid

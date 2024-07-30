@@ -92,6 +92,7 @@ fun ProfileScreen(modifier: Modifier = Modifier, onLogout: () -> Unit) {
             ) {
                 Text(text = "Profile",modifier = Modifier.padding(10.dp), fontSize = 30.sp, color = Color.White)
                 userInfoData(email = email)
+                Log.d("user", "userdata: $email")
                 outlinedField(value = name, onValueChange = { name = it }, label = "Name")
                 outlinedField(
                     value = mobileNumber,
