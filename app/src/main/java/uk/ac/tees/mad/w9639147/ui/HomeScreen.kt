@@ -2,6 +2,7 @@ package uk.ac.tees.mad.w9639147.ui
 
 import android.content.ContentValues.TAG
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,6 +53,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import uk.ac.tees.mad.w9639147.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -128,7 +131,7 @@ fun HomeScreen(modifier: Modifier = Modifier, onAddClicked: () -> Unit, onProfil
                 colors = listOf(Color(0xFF3F51B5), Color(0xFF2196F3))
             )
             Text(
-                text = "Your Tasks :-",
+                text = "Medicine Reminder:-",
                 style = TextStyle(
                     brush = gradient,
                     fontSize = 40.sp,
@@ -168,8 +171,16 @@ fun TaskItem(task: HashMap<String, Any>, onItemClick: (String) -> Unit) {
         onItemClick(id)
     }) {
         Row {
-            AsyncImage(model = imageUri, contentDescription = "task_image", modifier = Modifier.size(100.dp), contentScale = ContentScale.FillWidth)
-
+            if(imageUri.length>2) {
+                AsyncImage(
+                    model = imageUri,
+                    contentDescription = "task_image",
+                    modifier = Modifier.size(100.dp),
+                    contentScale = ContentScale.FillWidth
+                )
+            }else{
+                Image(painter = painterResource(id = R.drawable._2648222), contentDescription = "no image thumbnail",modifier = Modifier.size(100.dp),)
+            }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

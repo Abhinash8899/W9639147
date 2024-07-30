@@ -136,7 +136,7 @@ fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Add Task")
+                    Text(text = "Add Reminder")
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
@@ -178,7 +178,7 @@ fun AddTask(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
                     )
                 } ?: run {
                     Image(
-                        painter = rememberAsyncImagePainter(R.drawable.ic_launcher_foreground),
+                        painter = rememberAsyncImagePainter(R.drawable._2648222),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier

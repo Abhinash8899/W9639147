@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.widget.Space
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.rounded.LocationOn
@@ -23,11 +25,16 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +44,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -57,24 +65,38 @@ fun EditTaskScreen(context : Context, id: String, name: String, description: Str
     val isLoadingHere = remember {
         mutableStateOf(false)
     }
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary),
+        topBar = {
+            CenterAlignedTopAppBar(title = { Text(text = "Edit Details",
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold) })
+        }
+    ) {innerPadding ->
+
         AlertDialog(onDismissRequest = { onDismiss() }) {
-            if (isLoadingHere.value){
-                CircularProgressIndicator()
+            if (isLoadingHere.value) {
+                CircularProgressIndicator(modifier = Modifier.size(50.dp))
             }
-            Column {
+            Column(modifier = Modifier.padding(innerPadding)) {
                 OutlinedTextField(value = names.value, onValueChange = { names.value = it },
-                    label ={ Text(text =  "Name")})
-                OutlinedTextField(value = descriptions.value, onValueChange = {descriptions.value = it},
-                    label ={ Text(text =  "Description")})
-                OutlinedTextField(value = times.value, onValueChange = {times.value = it},
-                    label ={ Text(text =  "Time")})
-                OutlinedTextField(value = locations.value, onValueChange = {locations.value = it},
-                    label ={ Text(text =  "Location")})
+                    label = { Text(text = "Name") })
+                OutlinedTextField(value = descriptions.value,
+                    onValueChange = { descriptions.value = it },
+                    label = { Text(text = "Description") })
+                OutlinedTextField(value = times.value, onValueChange = { times.value = it },
+                    label = { Text(text = "Time") })
+                OutlinedTextField(value = locations.value, onValueChange = { locations.value = it },
+                    label = { Text(text = "Location") })
                 Button(onClick = {
                     isLoadingHere.value = true
                     val firestore = FirebaseFirestore.getInstance()
                     val userUid = Firebase.auth.currentUser?.uid
-                    val taskRef = firestore.collection("tasks").document(userUid!!).collection("user_tasks").document(id)
+                    val taskRef =
+                        firestore.collection("tasks").document(userUid!!).collection("user_tasks")
+                            .document(id)
                     taskRef.update(
                         mapOf(
                             "name" to names.value,
@@ -85,7 +107,8 @@ fun EditTaskScreen(context : Context, id: String, name: String, description: Str
                     ).addOnSuccessListener {
                         isLoadingHere.value = false
                         onDismiss()
-                        Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT)
+                            .show()
                     }.addOnFailureListener {
                         isLoadingHere.value = false
                         onDismiss()
@@ -96,8 +119,10 @@ fun EditTaskScreen(context : Context, id: String, name: String, description: Str
                 }
             }
         }
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskDetailsScreen(modifier: Modifier = Modifier,taskId: String, onBackClick: () -> Unit) {
     val userUid = Firebase.auth.currentUser?.uid
@@ -126,59 +151,90 @@ fun TaskDetailsScreen(modifier: Modifier = Modifier,taskId: String, onBackClick:
     val time = task.value["time"].toString()
     val location = task.value["location"].toString()
     val imageUri = task.value["imageUri"].toString()
-    Box {
-        Column(
-            modifier = Modifier.fillMaxSize(), Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Details")
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null
+                        )
+                    }
+                }
+            )
+        }
 
-            if (isEditVisible.value){
-                EditTaskScreen(
-                    context = context,
-                    id = id,
+    ) {innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(16.dp), Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                if (isEditVisible.value) {
+                    EditTaskScreen(
+                        context = context,
+                        id = id,
+                        name = name,
+                        description = description,
+                        time = time,
+                        location = location,
+                        onDismiss = {
+                            isEditVisible.value = false
+                        })
+                }
+//                val gradient = Brush.linearGradient(
+//                    colors = listOf(Color(0xFF3F51B5), Color(0xFF2196F3))
+//                )
+//                Text(
+//                    text = "Reminder Details",
+//                    style = TextStyle(
+//                        brush = gradient,
+//                        fontSize = 40.sp,
+//                        fontWeight = FontWeight.Bold
+//                    ),
+//                    fontSize = 20.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    modifier = Modifier.padding(start = 22.dp)
+//                )
+                if(imageUri.length>2){
+                AsyncImage(
+                    model = imageUri,
+                    contentDescription = null,
+                    modifier = Modifier.size(250.dp),
+                    contentScale = ContentScale.Inside
+                )
+                }else{
+                    Image(painter = painterResource(id = R.drawable._2648222), contentDescription = "no Image Thumbnail")
+                }
+                cardView(
                     name = name,
                     description = description,
                     time = time,
                     location = location,
-                    onDismiss = {
-                        isEditVisible.value = false
-                    })
+                    imageUri = imageUri,
+                    onDelete = {
+                        taskRef.delete()
+                            .addOnSuccessListener {
+                                Log.d("TaskDetailsScreen", "Task deleted successfully")
+                                onBackClick()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w("TaskDetailsScreen", "Error deleting task", e)
+                            }
+                    },
+                    onEditClick = {
+                        isEditVisible.value = true
+                    }
+                )
             }
-            val gradient = Brush.linearGradient(
-                colors = listOf(Color(0xFF3F51B5), Color(0xFF2196F3))
-            )
-            Text(
-                text = "Task Details",
-                style = TextStyle(
-                    brush = gradient,
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 22.dp)
-            )
-            AsyncImage(model = imageUri, contentDescription = null, modifier = Modifier.size(250.dp), contentScale = ContentScale.Inside)
-            cardView(
-                name = name,
-                description = description,
-                time = time,
-                location = location,
-                imageUri = imageUri,
-                onDelete = {
-                    taskRef.delete()
-                        .addOnSuccessListener {
-                            Log.d("TaskDetailsScreen", "Task deleted successfully")
-                            onBackClick()
-                        }
-                        .addOnFailureListener { e ->
-                            Log.w("TaskDetailsScreen", "Error deleting task", e)
-                        }
-                },
-                onEditClick = {
-                    isEditVisible.value = true
-                }
-            )
         }
     }
 }
@@ -203,23 +259,23 @@ fun cardView(name: String, description : String, time : String, location : Strin
                     )
             ) {
                 Text(
-                    text = name,
+                    text ="Name - $name",
                     color = Color.White,
-                    fontSize = 20.sp,
+                    fontSize = 30.sp,
                     fontWeight = FontWeight.Bold, modifier = Modifier.padding(10.dp)
                 )
                 Text(
-                    text = description,
+                    text = "Description - $description",
                     color = Color.White,
-                    fontSize = 17.sp,
+                    fontSize = 25.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(start = 10.dp, end = 10.dp)
                 )
                 Row {
                     Text(
-                        text = time,
+                        text = "Time - $time",
                         color = Color.White,
-                        fontSize = 10.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp)
                     )
 
